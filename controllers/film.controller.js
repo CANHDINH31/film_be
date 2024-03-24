@@ -1,4 +1,5 @@
 const filmModel = require("../models/film.model");
+const voteModel = require("../models/vote.model");
 
 module.exports = {
   create: async (req, res) => {
@@ -33,8 +34,33 @@ module.exports = {
       };
 
       let data = await filmModel.find(query).sort({ createdAt: -1 });
-      return res.status(200).json(data);
+      const listResult = [];
+      for (const film of data) {
+        const numberVote = await voteModel.countDocuments({ film: film._id });
+        const res = await voteModel.aggregate([
+          { $match: { film: film._id } },
+          {
+            $group: {
+              _id: "score",
+              score: { $sum: "$score" },
+            },
+          },
+          {
+            $project: {
+              totalScore: "$score",
+            },
+          },
+        ]);
+
+        listResult.push({
+          ...film.toObject(),
+          numberVote,
+          totalScore: res?.[0]?.totalScore,
+        });
+      }
+      return res.status(200).json(listResult);
     } catch (error) {
+      console.log(error);
       throw error;
     }
   },
