@@ -1,4 +1,6 @@
 const userModel = require("../models/user.model");
+const voteModel = require("../models/vote.model");
+const commentModel = require("../models/comment.model");
 
 module.exports = {
   signIn: async (req, res) => {
@@ -51,6 +53,7 @@ module.exports = {
       let data = await userModel
         .find({})
         .select(["-updatedAt", "-createdAt"])
+        .populate("favourite")
         .sort({ createdAt: -1 });
       return res.status(200).json(data);
     } catch (error) {
@@ -62,7 +65,8 @@ module.exports = {
     try {
       let data = await userModel
         .findById(req.params.id)
-        .select(["-updatedAt", "-createdAt"]);
+        .select(["-updatedAt", "-createdAt"])
+        .populate("favourite");
       return res.status(200).json(data);
     } catch (error) {
       throw error;
@@ -87,6 +91,8 @@ module.exports = {
   deleteData: async (req, res) => {
     try {
       await userModel.findOneAndDelete({ _id: req.params.id });
+      await voteModel.deleteMany({ user: req.params.id });
+      await commentModel.deleteMany({ user: req.params.id });
       res.status(201).json("Xóa user thành công");
     } catch (error) {
       throw error;

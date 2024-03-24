@@ -1,5 +1,6 @@
 const filmModel = require("../models/film.model");
 const voteModel = require("../models/vote.model");
+const commentModel = require("../models/comment.model");
 
 module.exports = {
   create: async (req, res) => {
@@ -92,6 +93,8 @@ module.exports = {
   deleteData: async (req, res) => {
     try {
       await filmModel.findOneAndDelete({ _id: req.params.id });
+      await commentModel.findOneAndDelete({ film: req.params.id });
+      await voteModel.findOneAndDelete({ film: req.params.id });
       res.status(201).json("Xóa film thành công");
     } catch (error) {
       throw error;
