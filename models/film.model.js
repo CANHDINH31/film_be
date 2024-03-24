@@ -25,11 +25,13 @@ const filmSchema = mongoose.Schema(
       type: [String],
     },
 
+    // Phim mới
     isNew: {
       type: Number,
       default: 0,
     },
 
+    // Phim đề cử
     isNominate: {
       type: Number,
       default: 0,
