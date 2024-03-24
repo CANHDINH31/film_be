@@ -1,6 +1,7 @@
 const filmModel = require("../models/film.model");
 const voteModel = require("../models/vote.model");
 const commentModel = require("../models/comment.model");
+const { default: mongoose } = require("mongoose");
 
 module.exports = {
   create: async (req, res) => {
@@ -81,11 +82,72 @@ module.exports = {
     }
   },
 
+  recommend: async (req, res) => {
+    try {
+      const data = await filmModel.findById(req.params.id);
+      const listCategory = data?.category;
+      const listData = await filmModel.find({
+        category: { $in: listCategory },
+      });
+      const listResult = [];
+      for (const film of listData) {
+        const numberVote = await voteModel.countDocuments({ film: film._id });
+        const res = await voteModel.aggregate([
+          { $match: { film: film._id } },
+          {
+            $group: {
+              _id: "score",
+              score: { $sum: "$score" },
+            },
+          },
+          {
+            $project: {
+              totalScore: "$score",
+            },
+          },
+        ]);
+
+        listResult.push({
+          ...film.toObject(),
+          numberVote,
+          totalScore: res?.[0]?.totalScore,
+        });
+      }
+      return res.status(200).json(listResult);
+    } catch (error) {
+      throw error;
+    }
+  },
+
   findOne: async (req, res) => {
     try {
       let data = await filmModel.findById(req.params.id);
-      return res.status(200).json(data);
+      const numberVote = await voteModel.countDocuments({
+        film: req.params.id,
+      });
+
+      const score = await voteModel.aggregate([
+        { $match: { film: data._id } },
+        {
+          $group: {
+            _id: "score",
+            score: { $sum: "$score" },
+          },
+        },
+        {
+          $project: {
+            totalScore: "$score",
+          },
+        },
+      ]);
+
+      return res.status(200).json({
+        ...data?.toObject(),
+        numberVote,
+        totalScore: score?.[0]?.totalScore,
+      });
     } catch (error) {
+      console.log(error);
       throw error;
     }
   },

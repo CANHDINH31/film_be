@@ -7,6 +7,7 @@ const {
   update,
   findOne,
   deleteData,
+  recommend,
 } = require("../controllers/film.controller");
 
 const asyncMiddelware = require("../middlewares/asyncHandle");
@@ -14,6 +15,7 @@ const asyncMiddelware = require("../middlewares/asyncHandle");
 router.route("/").post(asyncMiddelware(create));
 router.route("/:id").delete(asyncMiddelware(deleteData));
 router.route("/:id").put(asyncMiddelware(update));
+router.route("/recommend/:id").get(asyncMiddelware(recommend));
 router.route("/:id").get(asyncMiddelware(findOne));
 router.route("/").get(asyncMiddelware(list));
 
