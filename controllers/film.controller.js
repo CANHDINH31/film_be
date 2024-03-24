@@ -12,7 +12,27 @@ module.exports = {
 
   list: async (req, res) => {
     try {
-      let data = await filmModel.find({}).sort({ createdAt: -1 });
+      let query = {};
+
+      query = {
+        ...(req?.query?.isNew && {
+          isNew: req.query.isNew,
+        }),
+        ...(req?.query?.isNominate && {
+          isNominate: req.query.isNominate,
+        }),
+        ...(req?.query?.listCountry && {
+          country: { $in: req.query.listCountry?.split(",") },
+        }),
+        ...(req?.query?.listCategory && {
+          category: { $in: req.query.listCategory?.split(",") },
+        }),
+        ...(req?.query?.title && {
+          title: { $regex: req.query.title, $options: "i" },
+        }),
+      };
+
+      let data = await filmModel.find(query).sort({ createdAt: -1 });
       return res.status(200).json(data);
     } catch (error) {
       throw error;
