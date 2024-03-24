@@ -1,9 +1,9 @@
-const voteModel = require("../models/vote.model");
+const commentModel = require("../models/comment.model");
 
 module.exports = {
   create: async (req, res) => {
     try {
-      const data = await voteModel.create(req.body);
+      const data = await commentModel.create(req.body);
       return res.status(201).json(data);
     } catch (error) {
       throw error;
@@ -23,7 +23,7 @@ module.exports = {
         }),
       };
 
-      let data = await voteModel
+      let data = await commentModel
         .find(query)
         .sort({ createdAt: -1 })
         .populate("user")
@@ -36,7 +36,7 @@ module.exports = {
 
   update: async (req, res) => {
     try {
-      const data = await voteModel.findByIdAndUpdate(
+      const data = await commentModel.findByIdAndUpdate(
         req.params.id,
         {
           ...req.body,
@@ -51,7 +51,7 @@ module.exports = {
 
   findOne: async (req, res) => {
     try {
-      let data = await voteModel
+      let data = await commentModel
         .findById(req.params.id)
         .populate("user")
         .populate("film");
@@ -63,8 +63,8 @@ module.exports = {
 
   deleteData: async (req, res) => {
     try {
-      await voteModel.findOneAndDelete({ _id: req.params.id });
-      res.status(201).json("Xóa vote thành công");
+      await commentModel.findOneAndDelete({ _id: req.params.id });
+      res.status(201).json("Xóa comment thành công");
     } catch (error) {
       throw error;
     }
