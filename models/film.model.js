@@ -10,6 +10,10 @@ const filmSchema = mongoose.Schema(
       type: String,
     },
 
+    poster: {
+      type: String,
+    },
+
     // 1: Tâm lý tình cảm, 2: Hành động, 3: Hoạt hình, 4....
     category: {
       type: [Number],
