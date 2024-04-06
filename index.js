@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 connectDB();
+app.use("/uploads", express.static("uploads"));
 router(app);
 
 app.listen(process.env.PORT || 8000, () => {

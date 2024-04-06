@@ -1,14 +1,39 @@
 const filmModel = require("../models/film.model");
 const voteModel = require("../models/vote.model");
 const commentModel = require("../models/comment.model");
-const { default: mongoose } = require("mongoose");
+
+const multer = require("multer");
+const util = require("util");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const uploadManyFiles = multer({ storage: storage }).array("files", 17);
+
+const multipleUploadMiddleware = util.promisify(uploadManyFiles);
 
 module.exports = {
   create: async (req, res) => {
     try {
-      const data = await filmModel.create(req.body);
+      await multipleUploadMiddleware(req, res);
+      const url = req.files?.map((e) => `http://localhost:8000/${e.path}`);
+      const data = await filmModel.create({
+        title: req.body?.title,
+        description: req.body?.description,
+        poster: req.body?.poster,
+        url,
+        category: req.body?.category?.split(",")?.map((e) => Number(e)),
+        country: Number(req.body?.country),
+      });
       return res.status(201).json(data);
     } catch (error) {
+      console.log(error);
       throw error;
     }
   },

@@ -1,6 +1,8 @@
 module.exports = (err, req, res, next) => {
   let error = { ...err };
 
+  console.log(err);
+
   if (err.name === "CastError") {
     error.statusCode = 404;
     error.message = `Không có dữ liệu`;
