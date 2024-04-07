@@ -14,7 +14,10 @@ const storage = multer.diskStorage({
   },
 });
 
-const uploadManyFiles = multer({ storage: storage }).array("files", 17);
+const uploadManyFiles = multer({
+  storage: storage,
+  limits: { fieldSize: 62500000 },
+}).array("files", 17);
 
 const multipleUploadMiddleware = util.promisify(uploadManyFiles);
 
