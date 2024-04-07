@@ -14,26 +14,29 @@ const storage = multer.diskStorage({
   },
 });
 
-const uploadManyFiles = multer({
+const upload = multer({
   storage: storage,
   limits: { fieldSize: 62500000 },
-}).array("files", 17);
+}).single("file");
 
-const multipleUploadMiddleware = util.promisify(uploadManyFiles);
+const handleUpload = util.promisify(upload);
 
 module.exports = {
+  upload: async (req, res) => {
+    try {
+      await handleUpload(req, res);
+      return res
+        .status(201)
+        .json({ url: `http://localhost:8000/${req.file.path}` });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+
   create: async (req, res) => {
     try {
-      await multipleUploadMiddleware(req, res);
-      const url = req.files?.map((e) => `http://localhost:8000/${e.path}`);
-      const data = await filmModel.create({
-        title: req.body?.title,
-        description: req.body?.description,
-        poster: req.body?.poster,
-        url,
-        category: req.body?.category?.split(",")?.map((e) => Number(e)),
-        country: Number(req.body?.country),
-      });
+      const data = await filmModel.create(req.body);
       return res.status(201).json(data);
     } catch (error) {
       console.log(error);
